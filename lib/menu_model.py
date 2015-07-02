@@ -1,3 +1,4 @@
+import datetime
 import sqlalchemy
 import sqlalchemy.ext.declarative
 
@@ -22,6 +23,9 @@ class Menu(Base):
         :param dict_:
         :return:
         """
+        dict_["time_created"] = datetime.datetime.now()
+        dict_["time_updated"] = dict_["time_created"]
+
         return cls(**dict_)
 
     def to_dict(self):
@@ -35,6 +39,11 @@ class Menu(Base):
             "time_created": "%s" % self.time_created,
             "time_updated": "%s" % self.time_updated
         }
+
+    def update(self, data):
+        if "description" in data:
+            self.description = data["description"]
+            self.time_updated = datetime.datetime.now()
 
 
 class SubMenu(Base):
@@ -59,3 +68,23 @@ class MenuItem(Base):
     price = Column(String)
     process_time = Column(Integer)
     image = Column(String, nullable=True)
+
+
+if __name__ == "__main__":
+    from sqlalchemy import create_engine
+    engine = create_engine("sqlite:///dev.sqlite")
+    Base.metadata.create_all(engine, checkfirst=True)
+
+    print Menu.__base__
+
+    menu = Menu.from_dict({
+        "description": "hello!"
+    })
+
+    from sqlalchemy.orm import sessionmaker
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    session.add(menu)
+    session.commit()
+
+    print menu.to_dict()

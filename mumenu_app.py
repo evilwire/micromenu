@@ -10,15 +10,21 @@ router = HTTPRouter()
 micro_app = MicroMenu()
 
 
-@router.post("/customers")
-def create_customers(request):
-    print request
-    return router.json_response({"status": "OK"}, resp=bottle.response)
+@router.post("/menus")
+def create_menus(request):
+    menu = micro_app.create_menu(request)
+    return router.json_response({
+        "status": "OK",
+        "data": menu.to_dict()
+    }, resp=bottle.response)
 
 
-@router.get("/customers")
+@router.get("/menus")
 def index_customers():
-    return micro_app.index_customers()
+    return router.json_response({
+        "status": "OK",
+        "data": micro_app.list_menus()
+    }, resp=bottle.response)
 
 
 if __name__ == "__main__":
